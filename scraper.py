@@ -1,15 +1,8 @@
 import argparse
-import os
-import sys
 
-from dotenv import load_dotenv
 from telethon.sync import TelegramClient
 
-load_dotenv()
-
-API_ID = os.environ.get("API_ID")
-API_HASH = os.environ.get("API_HASH")
-PHONE_NUMBER = os.environ.get("PHONE_NUMBER")
+from client import PHONE_NUMBER, build_client
 
 
 def parse_group_id(raw: str):
@@ -24,21 +17,9 @@ def main():
     parser.add_argument("group_id", help="Numeric group ID, @username, or t.me link")
     args = parser.parse_args()
 
-    if not API_ID or not API_HASH:
-        sys.exit("API_ID and API_HASH must be set in .env (see .env.example)")
-
     group = parse_group_id(args.group_id)
 
-    with TelegramClient(
-        "scraper_session",
-        int(API_ID),
-        API_HASH,
-        device_model="Samsung SM-G998B",
-        system_version="SDK 33",
-        app_version="10.5.4",
-        lang_code="en",
-        system_lang_code="en-US",
-    ) as client:
+    with build_client(TelegramClient) as client:
         client.start(phone=PHONE_NUMBER)
 
         entity = client.get_entity(group)
